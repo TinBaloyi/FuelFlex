@@ -1,3 +1,4 @@
+
 from tkinter import messagebox, simpledialog
 import tkinter as tk
 import re
@@ -34,7 +35,6 @@ class FuelFlexApp(tk.Tk):
         self.pin = None
         self.balance = 0
         self.monthly_fuel_purchased = 0
-        self.transactions = []  # List to store transactions
 
         # Welcome Frame
         self.welcome_frame = tk.Frame(self, bg='black')
@@ -166,55 +166,16 @@ class FuelFlexApp(tk.Tk):
         fuel_amount_entry = tk.Entry(purchase_frame)
         fuel_amount_entry.pack(pady=10)
 
-        def calculate_monthly_bill(fuel_amount):
-            interest = fuel_amount * INTEREST_RATE
-            total_amount = fuel_amount + interest + 17 + 40.5
-            return total_amount
-
         def purchase_fuel():
             fuel_amount = float(fuel_amount_entry.get())
-            monthly_bill = calculate_monthly_bill(fuel_amount)
             if self.monthly_fuel_purchased + fuel_amount <= MONTHLY_LIMIT:
+                interest = fuel_amount * 0.115
+                total_amount = fuel_amount + interest + 17 + 40.5
                 self.monthly_fuel_purchased += fuel_amount
-                self.transactions.append((datetime.datetime.now(), "Fuel Purchase", monthly_bill))  # Record transaction
-                messagebox.showinfo("Purchase Successful", f"Your total bill for this month is: R{monthly_bill:.2f}")
-                # Now prompt the user to choose the payment method
-                choose_payment_method(monthly_bill)
+                messagebox.showinfo("Purchase Successful", "Your total bill for this month is: R{:.2f}".format(total_amount))
             else:
-                remaining_amount = MONTHLY_LIMIT - self.monthly_fuel_purchased
-                messagebox.showerror("Error", f"You have reached your monthly limit for fuel purchase. Amount remaining: R{remaining_amount:.2f}")
+                messagebox.showerror("Error", "You have exceeded your monthly limit of R{} for fuel purchase.".format(MONTHLY_LIMIT))
             fuel_amount_entry.delete(0, tk.END)
-
-        def choose_payment_method(amount):
-            payment_frame = tk.Frame(purchase_frame, bg='black')
-            tk.Label(payment_frame, text="Choose Payment Method:", bg='black', fg='white', font=('Helvetica', 12)).pack(pady=10)
-
-            def pay_with_visa():
-                messagebox.showinfo("Payment Method", f"Payment of R{amount:.2f} with Visa is successful.")
-                payment_frame.destroy()
-
-            def pay_with_mastercard():
-                messagebox.showinfo("Payment Method", f"Payment of R{amount:.2f} with Mastercard is successful.")
-                payment_frame.destroy()
-
-            def pay_with_mpesa():
-                messagebox.showinfo("Payment Method", f"Payment of R{amount:.2f} with M-Pesa is successful.")
-                payment_frame.destroy()
-
-            def pay_with_ecocash():
-                messagebox.showinfo("Payment Method", f"Payment of R{amount:.2f} with EcoCash is successful.")
-                payment_frame.destroy()
-
-            visa_button = tk.Button(payment_frame, text="Visa", command=pay_with_visa)
-            visa_button.pack(pady=5)
-            mastercard_button = tk.Button(payment_frame, text="Mastercard", command=pay_with_mastercard)
-            mastercard_button.pack(pady=5)
-            mpesa_button = tk.Button(payment_frame, text="M-Pesa", command=pay_with_mpesa)
-            mpesa_button.pack(pady=5)
-            ecocash_button = tk.Button(payment_frame, text="EcoCash", command=pay_with_ecocash)
-            ecocash_button.pack(pady=5)
-
-            payment_frame.pack()
 
         purchase_button = tk.Button(purchase_frame, text="Purchase", command=purchase_fuel)
         purchase_button.pack(pady=10)
@@ -240,12 +201,8 @@ class FuelFlexApp(tk.Tk):
         # View receipts window frame
         view_receipts_frame = tk.Frame(self, bg='black')
         tk.Label(view_receipts_frame, text="View Receipts Window", font=("Helvetica", 16), bg='black', fg='white').pack(pady=20)
-
-        receipt_text = ""
-        for transaction in self.transactions:
-            receipt_text += f"{transaction[0].strftime('%Y-%m-%d')}   {transaction[1]}   R{transaction[2]:.2f}\n"
-
-        receipt_label = tk.Label(view_receipts_frame, text=receipt_text, bg='black', fg='white')
+        last_transaction = "2022-01-31   Fuel purchase   R500.00"
+        receipt_label = tk.Label(view_receipts_frame, text="Last transaction:\n" + last_transaction, bg='black', fg='white')
         receipt_label.pack(pady=20)
 
         view_receipts_frame.pack(expand=True)
@@ -269,34 +226,28 @@ class FuelFlexApp(tk.Tk):
         # Download receipts window frame
         download_receipts_frame = tk.Frame(self, bg='black')
         tk.Label(download_receipts_frame, text="Download Receipts Window", font=("Helvetica", 16), bg='black', fg='white').pack(pady=20)
-
-        receipt_text = ""
-        for transaction in self.transactions:
-            receipt_text += f"{transaction[0].strftime('%Y-%m-%d')}   {transaction[1]}   R{transaction[2]:.2f}\n"
-
-        with open("transactions_receipts.txt", "w") as file:
-            file.write(receipt_text)
-
-        download_label = tk.Label(download_receipts_frame, text="Receipts downloaded as transactions_receipts.txt", bg='black', fg='white')
+        last_transaction = "2022-01-31   Fuel purchase   R500.00"
+        with open("last_transaction.txt", "w") as file:
+            file.write(last_transaction)
+        download_label = tk.Label(download_receipts_frame, text="Receipt downloaded as last_transaction.txt", bg='black', fg='white')
         download_label.pack(pady=20)
 
         download_receipts_frame.pack(expand=True)
 
     def view_yearly_statements(self):
         # Generate yearly statement PDF
-        pdf = FPDF()
-        pdf.add_page()
-        pdf.set_font("Arial", size=12)
-        pdf.cell(200, 10, txt="FuelFlex - Yearly Statement", ln=True, align="C")
-        pdf.cell(200, 10, txt=f"Name: {self.name}", ln=True, align="L")
-        pdf.cell(200, 10, txt=f"Phone Number: {self.phone_number}", ln=True, align="L")
-        pdf.cell(200, 10, txt=f"Date: {datetime.datetime.now().strftime('%Y-%m-%d')}", ln=True, align="L")
-        pdf.cell(200, 10, txt="\n", ln=True)  # Add empty line
-        pdf.cell(200, 10, txt="Yearly Statement:", ln=True, align="L")
-        # Add yearly statement data here
-        pdf.output("yearly_statement.pdf")
+        with open("yearly_statement.txt", "w") as file:
+            file.write("FuelFlex - Yearly Statement\n")
+            file.write(f"Name: {self.name}\n")
+            file.write(f"Phone Number: {self.phone_number}\n")
+            file.write(f"Date: {datetime.datetime.now().strftime('%Y-%m-%d')}\n\n")
+            file.write("Yearly Statement:\n")
+            # Add yearly statement data here
+
+        messagebox.showinfo("Yearly Statement", "Yearly statement generated. Check the file yearly_statement.txt.")
 
 # Run the application
 if __name__ == "__main__":
     app = FuelFlexApp()
     app.mainloop()
+
