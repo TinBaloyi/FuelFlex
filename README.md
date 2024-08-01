@@ -1,5 +1,7 @@
 # FuelFlex
 
+ dummy_otp = "123456"
+
 FuelFlex - Smart Fuel Management
 FuelFlex is a convenient and user-friendly application designed to streamline your fuel purchase and management experience. With FuelFlex, you have access to a virtual card that allows you to purchase fuel up to a limit of R3000 per month. If you exceed this limit, the card will temporarily be disabled until the next billing cycle.
 
