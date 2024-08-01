@@ -4,6 +4,9 @@ import re
 import datetime
 
 # Constants for the application
+MONTHLY_LIMIT = 3000
+INTEREST_RATE = 0.115
+
 # Regular expressions for phone numbers of Lesotho, Eswatini, Botswana, South Africa, and India
 PHONE_PATTERNS = {
     'Lesotho': r'^(?:\+266)?[256]\d{7}$',
